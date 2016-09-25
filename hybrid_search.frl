@@ -1,3 +1,14 @@
+/* Alex Kersey
+ * Daniel Moon 
+ * Garrett Scholtes
+ * 
+ * 2016-09-25
+ * 
+ * AI Assignment #2
+ *
+ *
+ */
+
 /* The  stopping rule for this condition is obtained when 
 the current path to be expanded starts with the goal node, that is:
 */
@@ -89,16 +100,14 @@ path in the graph and finds all possible acyclic successor paths (NPaths)
 
 /*** graph example ***/
 ((connect a b))
-((connect a d))
-((connect a f))
-
-((connect b c))
+((connect a c))
+((connect b d))
+((connect b e))
 ((connect b f))
-
-((connect d e))
-((connect f e))
-
-((connect c e))
+((connect c g))
+((connect c h))
+((connect d i))
+((connect d j))
 
 ((path X Y)(connect X Y))
 ((path X Y)(connect Y X))
@@ -243,3 +252,86 @@ obtained from branch X being put in a list of branches Y
 
 ((pretty_print_solution () ))
 ((pretty_print_solution (H|T))(pp)(p H "->")(pretty_print_solution T))
+
+
+/********************************************************/
+/********************** DISCUSSION **********************/
+/********************************************************/
+/*
+ *
+ * The motivation for creating a hybrid search is that either depth first
+ * or breadth first may perform better depending on the branching factor
+ * of a node being searched.
+ * 
+ * We attempt to create a "hybrid" search of these two search methods in
+ * order to take advantage of the best cases of each search pattern.
+ * 
+ * ---------------------------------------------------------------------
+ *
+ * See the following example (image of the connect statements above)
+ * 
+ *       https://i.imgur.com/nkltcoz.png  <--- our example graph 
+ * 
+ * 
+ * We chose to use a basic acyclic graph for simplicity of the analysis
+ * 
+ * Suppose in this example we wish to search for a path from "a" to "f"
+ * 
+ * In this example we can clearly see that the fastest search solution would  
+ * identify the path "a -> b -> f" in 3 checks (i.e., it would check the nodes
+ * in this order: [a, b, f])
+ * 
+ * We can also see in this example that depth first search would take 7 checks 
+ * to find the solution, searching the nodes in the order [a, b, d, i, j, e, f]
+ * 
+ * Breadth first would look at nodes in the order [a, b, c, d, e, f], finding
+ * the solution in 6 steps.
+ * 
+ * Let us suppose we perform a hybrid search with T = 3.  In this case, the search
+ * visits nodes in the order [a, b, d, e, f], in only 5 checks -- better than 
+ * breadth first and depth first alone.  By using the branching factor to determine
+ * which order to search, we were able to prune nodes that would have otherwise been 
+ * searched via the other methods.
+ * 
+ * 
+ * 
+ * This simple example demonstrates how HybridDB can SOMETIMES perform better
+ * than both depth first and breadth first search.  However, this alone does not
+ * necessarily demonstrate that HybridDB is always better.
+ * 
+ * In fact, we can construct a pathological example where HybridDB performs *worse* 
+ * than both its breadth first and depth first counterparts
+ * 
+ *                 a
+ *                /|\
+ *               / | \
+ *              /  |  \  
+ *              b  c   d
+ *             /\
+ *            /  \
+ *            e   f
+ *           /\
+ *          /  \
+ *          g   h
+ * 
+ * 
+ *    https://i.imgur.com/jrfAYl9.png <-- visit this link if the formatting looks bad
+ * 
+ * 
+ * 
+ * In this example, suppose we wish to find the path from "a" to "f"
+ * 
+ * Breadth first searches in order [a, b, c, d, e, f], performing 6 checks 
+ * 
+ * Depth first searches in order [a, b, e, g, h, f], also performing 6 checks
+ * 
+ * HybridDB, width T = 3, searches in order [a, b, c, d, e, g, h, f], which
+ * visits every node in the graph and takes 8 checks, worse than both cases
+ *
+ * 
+ * 
+ * 
+ * Therefore, we can conclude that HybridDB will SOMETIMES perform BETTER
+ * and SOMETIMES perform WORSE than both Breadth and Depth first search
+ *
+ */
